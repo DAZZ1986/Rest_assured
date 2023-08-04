@@ -1,4 +1,4 @@
-package l3.DZ;
+package Pet_api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +41,6 @@ public class PetApiTest extends AbstractTest {
     @Test
     @DisplayName("Validate - Check json Schema")
     void checkJsonSchema() {
-
         given()
                 .header("Content-Type", "application/json")
                 .header("accept", "application/json")

@@ -1,4 +1,4 @@
-package l3.DZ;
+package Pet_api;
 
 import com.fasterxml.jackson.annotation.*;
 
@@ -10,7 +10,7 @@ import java.util.Map;
         "id",
         "name"
 })
-public class Category {
+public class Tag {
 
     @JsonProperty("id")
     private Integer id;
@@ -20,7 +20,6 @@ public class Category {
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
-
 
 
 
