@@ -34,9 +34,11 @@ public class PetApiTest extends AbstractTest {
     //l3 DZ - перенос из постмана в автотесты
     //l4 DZ:
     //рефактор нашдобавить RequestSpecification и ResponseSpecification спецификации - ok
-    //отправка и получение json объекта с использованием jackson (сериализации/десериализации) -
+    //отправка и получение json объекта с использованием jackson (сериализации/десериализации) - ok
 
 
+    //Базовая сериализация и десериализация JSON с Jackson - в данном файле пример базовой сериализации и десериализации.
+    //https://habr.com/ru/companies/otus/articles/687004/
 
     @Test
     @DisplayName("Validate - Check json Schema")
@@ -56,7 +58,7 @@ public class PetApiTest extends AbstractTest {
 
 
 
-    /*
+    /*  переност автотестов из postman
     pm.test("Status code is 200", function () {
         pm.response.to.have.status(200);
     });
@@ -65,7 +67,7 @@ public class PetApiTest extends AbstractTest {
         pm.expect(jsonData.name).to.eql("Musy");
     });
      */
-    /*
+    /*  без сериализации
     @Test   //Отправка POST запроса - json файлом в body запроса.
     @DisplayName("POST - Check pet create")
     void checkPetPOST() {
@@ -115,7 +117,7 @@ public class PetApiTest extends AbstractTest {
 
         Response respPost = given()
                 .spec(getRequestSpecification())
-                .body(jsonPet1)     //и наш pojo отправляем как строку json
+                .body(jsonPet1)     //и наш pojo отправляем как json строку
                 .when()
                 .request(Method.POST, getBaseUrl() + "v2/pet");
 
@@ -130,7 +132,7 @@ public class PetApiTest extends AbstractTest {
 
 
 
-    /*
+    /*  переност автотестов из postman
     var jsonData = pm.response.json();
 
     pm.test("Status code is 200", function () {
@@ -150,7 +152,7 @@ public class PetApiTest extends AbstractTest {
         pm.expect(jsonData.status).to.eql("available");
     });
      */
-    /*
+    /*  без десериализации
     Response respGet = given()
                             .header("Content-Type", "application/json")
                             .header("accept", "application/json")
@@ -167,7 +169,7 @@ public class PetApiTest extends AbstractTest {
     assertThat(respJsonBody.get("tags[0].id"), equalTo(0));
     assertThat(respJsonBody.get("status"), equalTo("available"));
     */
-    @Test  //Отправка GET запроса - ДЕСЕРИАЛИЗАЦИЯ json из ответа в pojo объект.
+    @Test  //Отправка GET запроса - ДЕСЕРИАЛИЗАЦИЯ, json из ответа в pojo объект.
     @DisplayName("GET - Check pet exist")
     void checkPetGET() throws IOException {
 
@@ -233,7 +235,7 @@ public class PetApiTest extends AbstractTest {
 
 
 
-    /*
+    /*  переност автотестов из postman
     pm.test("Status code is 200", function () {
         pm.response.to.have.status(200);
     });
@@ -288,7 +290,7 @@ public class PetApiTest extends AbstractTest {
 
 
 
-    /*
+    /*  переност автотестов из postman
     var jsonData = pm.response.json();
 
     pm.test("Status code is 200", function () {
