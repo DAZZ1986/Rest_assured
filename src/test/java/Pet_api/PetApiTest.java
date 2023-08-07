@@ -2,6 +2,10 @@ package Pet_api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.qameta.allure.Allure;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Method;
@@ -10,11 +14,12 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +27,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@Story("Манипуляции с сущностью класса Pet")
 public class PetApiTest extends AbstractTest {
 
     private static Long id = null;
@@ -31,8 +37,7 @@ public class PetApiTest extends AbstractTest {
     static void setUp(){
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();   //глобальное логирование - логировать если чтото пойдет не так
     }
-    //l3 DZ - перенос из постмана в автотесты
-    //l4 DZ:
+    //перенос из постмана в автотесты
     //рефактор нашдобавить RequestSpecification и ResponseSpecification спецификации - ok
     //отправка и получение json объекта с использованием jackson (сериализации/десериализации) - ok
 
@@ -41,7 +46,7 @@ public class PetApiTest extends AbstractTest {
     //https://habr.com/ru/companies/otus/articles/687004/
 
     @Test
-    @DisplayName("Validate - Check json Schema")
+    @DisplayName("Validate doc by json Schema")
     void checkJsonSchema() {
         given()
                 .header("Content-Type", "application/json")
@@ -86,7 +91,9 @@ public class PetApiTest extends AbstractTest {
      */
     @Test  //Отправка POST запроса - СЕРИАЛИЗАЦИЯ pojo объект в body запроса.
     @DisplayName("POST - Check pet create")
-    void checkPetPOST() throws JsonProcessingException {
+    @Feature("Карточка товара")
+    @Step("Создание сущности класса Pet")
+    void createEntitycheckPOST() throws JsonProcessingException {
 
         Category category1 = new Category();
         category1.setId(7);
@@ -106,7 +113,7 @@ public class PetApiTest extends AbstractTest {
         Pet pet1 = new Pet();
         pet1.setId(0l);
         pet1.setCategory(category1);
-        pet1.setName("Musy1");
+        pet1.setName("MusyPOST");
         pet1.setPhotoUrls(listPhoto);
         pet1.setTags(listTag);
         pet1.setStatus("available");
@@ -122,9 +129,11 @@ public class PetApiTest extends AbstractTest {
                 .request(Method.POST, getBaseUrl() + "v2/pet");
 
         assertThat(respPost.getStatusCode(), equalTo(200));
-        assertThat(respPost.getBody().jsonPath().get("name").toString(), equalTo("Musy1"));
+        assertThat(respPost.getBody().jsonPath().get("name").toString(), equalTo("MusyPOST"));
+
+        Allure.step("Сущность Pet создана");
+
         id = respPost.getBody().jsonPath().get("id");
-        debug = "asd";
     }
 
 
@@ -171,7 +180,12 @@ public class PetApiTest extends AbstractTest {
     */
     @Test  //Отправка GET запроса - ДЕСЕРИАЛИЗАЦИЯ, json из ответа в pojo объект.
     @DisplayName("GET - Check pet exist")
+    @Feature("Личный кабинет")
+    @Step("Проверка наличия сущности класса Pet")
     void checkPetGET() throws IOException {
+        if(id == null) {
+            createEntitycheckPOST();
+        }
 
         Response respGet = given()
                 .header("Content-Type", "application/json")
@@ -185,9 +199,12 @@ public class PetApiTest extends AbstractTest {
 
         JsonPath respJsonBody = respGet.getBody().jsonPath();
         assertThat(respJsonBody.get("id"), equalTo(id));
+        assertThat(respJsonBody.get("name"), equalTo("Musy_PUT_UPDATE"));
         assertThat(respJsonBody.get("category.name"), equalTo("home"));
         assertThat(respJsonBody.get("tags[0].id"), equalTo(0));
-        assertThat(respJsonBody.get("status"), equalTo("available"));
+        assertThat(respJsonBody.get("status"), equalTo("sold"));
+
+        Allure.step("Сущность Pet получена");
 
 
         //ДЕСЕРИАЛИЗАЦИЯ
@@ -211,17 +228,17 @@ public class PetApiTest extends AbstractTest {
 
         //вариант 2. ObjectMapper
         //а) - D:\CODE\Курс\AQA\moi gb.ru\6 Тестирование backend на Java - Максим Кравченко\Урок 4. Расширенные возможности rest-assured\ДЗ сериализация, десериализация
+/*
         String employeeJson = "{\n" +
                                 " \"firstName\" : \"Jalil\",\n" +
                                 " \"lastName\" : \"Jarjanazy\",\n" +
                                 " \"age\" : 30\n" +
                                 "}";
-
+*/
         ObjectMapper objectMapper = new ObjectMapper();
-
-        String json = respJsonBody.prettify();    //json сохраняем как строку
-        Pet newPet1 = objectMapper.readValue(json, Pet.class);   //и данную строку json передаем в метод readValue и сохраняем как объект Pet
-        System.out.println(newPet1);    //3. ДЕСЕРИАЛИЗАЦИЯ, мы можем разложить json файл по переменным POJO класса - как достать json переменную?
+        String json = respJsonBody.prettify();                    //json сохраняем как строку
+        Pet newPet1 = objectMapper.readValue(json, Pet.class);    //и данную строку json передаем в метод readValue и сохраняем как объект Pet
+        System.out.println(newPet1);                              //3. ДЕСЕРИАЛИЗАЦИЯ, мы можем разложить json файл по переменным POJO класса - как достать json переменную?
 
         //б) - https://stackoverflow.com/questions/45110031/convert-jsonobject-to-json-string-with-jackson
         //ObjectMapper mapper = new ObjectMapper();
@@ -252,18 +269,29 @@ public class PetApiTest extends AbstractTest {
      */
     @Test
     @DisplayName("UPDATE - Check pet name update")
-    void checkPetUPDATE() {
-        File jsonFile0 = new File("src/test/java/l3/DZ/files/PetPUTJsonFile.json");
+    @Feature("Личный кабинет")
+    @Step("Проверка модификации сущности класса Pet")
+    void checkPetUPDATE() throws JsonProcessingException, ParseException {
+        if(id == null) {
+            createEntitycheckPOST();
+        }
 
-        //update id in Json file
-        try (Reader jsonFile1 = new FileReader("src/test/java/l3/DZ/files/PetPUTJsonFile.json")) {
+        //By File
+        /*
+        File jsonFile0 = new File("src/test/java/Pet_api/files/PetPUTJsonFile.json");
+
+        //update from Json file
+        try (Reader jsonFile1 = new FileReader("src/test/java/Pet_api/files/PetPUTJsonFile.json")) {
             //Read JSON file
             JSONParser parser = new JSONParser();
             JSONObject data = (JSONObject) parser.parse(jsonFile1);
             data.put("id", id);
+            data.put("name", "Musy_PUT_UPDATE");
+            data.put("status", "sold");
+
             //Write JSON file
             @SuppressWarnings("resource")
-            FileWriter file = new FileWriter("src/test/java/l3/DZ/files/PetPUTJsonFile.json");
+            FileWriter file = new FileWriter("src/test/java/Pet_api/files/PetPUTJsonFile.json");
             file.write(data.toJSONString());
             file.flush();
         } catch (IOException e) {
@@ -271,18 +299,41 @@ public class PetApiTest extends AbstractTest {
         } catch (org.json.simple.parser.ParseException e) {
             e.printStackTrace();
         }
+        */
+
+        JsonPath getPet = given()
+                .header("Content-Type", "application/json")
+                .header("accept", "application/json")
+                .pathParam("id",id)
+                .when()
+                .request(Method.GET, getBaseUrl() + "v2/pet/{id}")
+                .then()
+                .extract()
+                .jsonPath();
+
+        //Read JSON data
+        JSONParser parser = new JSONParser();
+        String jsonStr = getPet.prettify();    //json сохраняем как строку
+        //Write JSON data
+        JSONObject data = (JSONObject) parser.parse(jsonStr);
+        data.put("name", "Musy_PUT_UPDATE");
+        data.put("status", "sold");
+
 
         Response respUpdate = given()
                 .header("Content-Type", "application/json")
                 .header("accept", "application/json")
-                .body(jsonFile0)
+                .body(data)
                     .when()
                     .request(Method.PUT, getBaseUrl() + "v2/pet");
 
         assertThat(respUpdate.getStatusCode(), equalTo(200));
         JsonPath respJsonBody = respUpdate.getBody().jsonPath();
         assertThat(respJsonBody.get("id"), equalTo(id));
-        assertThat(respJsonBody.get("name"), equalTo("Musy_PUT"));
+        assertThat(respJsonBody.get("name"), equalTo("Musy_PUT_UPDATE"));
+        assertThat(respJsonBody.get("status"), equalTo("sold"));
+
+        Allure.step("Сущность Pet корректно модифицирована");
     }
 
 
@@ -305,8 +356,13 @@ public class PetApiTest extends AbstractTest {
      */
     @Test
     @DisplayName("DELETE - Check pet is deleted")
+    @Feature("Корзина")
+    @Step("Проверка удаления сущности класса Pet")
     void checkPetDELETE() throws JsonProcessingException {
-        checkPetPOST();
+        if(id == null) {
+            createEntitycheckPOST();
+        }
+
         //удаляем объект
         Response respDelete = given()
                 .header("Content-Type", "application/json")
@@ -326,7 +382,6 @@ public class PetApiTest extends AbstractTest {
         assertThat(hills, equalTo(id));                                 //проверка 3
 
 
-
         //перепроверяем удаление GET запросом
         given()
                 .header("Content-Type", "application/json")
@@ -341,6 +396,10 @@ public class PetApiTest extends AbstractTest {
                     .request(Method.GET, getBaseUrl() + "v2/pet/{id}");
                         //.then()
                         //.spec(getResponseSpecification());
+
+        Allure.step("Сущность Pet корректно удалена");
+
+        id = null;
     }
 
 }

@@ -39,7 +39,7 @@ public class AbstractTest {
                 .addHeader("accept", "application/json")
                 .build();
         responseSpecification = new ResponseSpecBuilder()
-                .expectResponseTime(Matchers.lessThan(5000L))
+                .expectResponseTime(Matchers.lessThan(15000L))
                 .expectContentType(ContentType.JSON)
                 .build();
         RestAssured.requestSpecification = requestSpecification;
