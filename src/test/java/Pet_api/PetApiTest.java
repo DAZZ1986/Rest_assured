@@ -12,6 +12,9 @@ import io.restassured.http.Method;
 import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import main.API.Category;
+import main.API.Pet;
+import main.API.Tag;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -27,7 +30,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@Story("Манипуляции с сущностью класса Pet")
+@Story("CRUD манипуляции с сущностью класса Pet")
 public class PetApiTest extends AbstractTest {
 
     private static Long id = null;
@@ -376,8 +379,9 @@ public class PetApiTest extends AbstractTest {
 
         JsonPath respJsonBody = respDelete.getBody().jsonPath();
         assertThat(respJsonBody.get("code"), equalTo(200));     //проверка 2
-        //convert string to long
+        //take out message value
         String mes = respJsonBody.get("message");
+        //convert message value from string to long
         long hills = Long.parseLong(mes);
         assertThat(hills, equalTo(id));                                 //проверка 3
 
