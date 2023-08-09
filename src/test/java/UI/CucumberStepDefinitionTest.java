@@ -35,7 +35,10 @@ public class CucumberStepDefinitionTest {
 
     @And("Подобрать любой автомобиль по параметрам, заполнив все параметры {string}")
     public void подобратьЛюбойАвтомобильПоПараметрамЗаполнивВсеПараметрыMark(String expectedCarMark) {
-        new ParametrPage().chooseParametors(expectedCarMark);
+    }
+    @And("Подобрать любой автомобиль по параметрам, заполнив все параметры {string} {string} {string}")
+    public void подобратьЛюбойАвтомобильПоПараметрамЗаполнивВсеПараметрыCityMarkModel(String City, String Mark, String Model) {
+        new ParametrPage().chooseParametors(City, Mark, Model);
     }
 
     @And("^Нажать на кнопку «Показать все предложения»$")
@@ -63,5 +66,6 @@ public class CucumberStepDefinitionTest {
     public void closeBrowser() {
         Selenide.closeWebDriver();
     }
+
 
 }
